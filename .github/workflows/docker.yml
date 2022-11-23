@@ -8,6 +8,7 @@ on:
     # Everyday
     - cron: '0 16 * * *'
 
+  workflow_dispatch:
 
 jobs:
   build:
@@ -36,14 +37,11 @@ jobs:
     - name: Clone Memos
       run: |
         git clone https://github.com/usememos/memos.git -b main --single-branch memos
-        cd memos/web/src/components
-        short(){
-            git log --pretty=format:"%h" -n 1
-        }
-        hash() {
-            git log --pretty=format:"%H" -n 1
-        }
-        sed -i "s/{profile?.mode}/nightly\(\<a href\='https\:\/\/github\.com\/usememos\/memos\/tree\/$(hash)' target\='_blank'\>$(short)\<\/a\>\)/g" AboutSiteDialog.tsx
+
+    - name: Current date
+      run: |
+        echo "TODAY=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+        echo ${{ env.TODAY }}
 
     - name: Build and Push
       id: docker_build
@@ -55,3 +53,20 @@ jobs:
         push: true
         tags: |
           eallion/memos:nightly
+          eallion/memos:${{ env.TODAY }}
+
+    - name: Dev mode
+      run: |
+        cd memos
+        sed -i "s/prod/dev/g" ./Dockerfile
+
+    - name: Build and Push Dev
+      id: docker_build_dev
+      uses: docker/build-push-action@v3
+      with:
+        context: "./memos"
+        file: ./memos/Dockerfile
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: |
+          eallion/memos:dev
