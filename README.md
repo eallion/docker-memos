@@ -1,5 +1,7 @@
 # Build Memos Docker image Nightly
 
+# ** Deprecated, Archived! **
+
 English | [中文](./README_cn.md)
 
 Build Memos Docker image nightly based on: [`usememos/memos:main`](https://github.com/usememos/memos)
